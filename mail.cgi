@@ -1,27 +1,56 @@
 #!/usr/bin/env python
 
 import cgi
+# debug
 import cgitb
 cgitb.enable()
+
+import subprocess
+import tempfile
 
 MAIN_FORM="mail.html"
 
 print "Content-Type: text/html"     # HTML is following
 print                               # blank line, end of headers
 
-form = cgi.FieldStorage()
-if "mailtext" in form and "recipient" in form:
-    print "Submitted: "
-    txt = form.getvalue("mailtext")
-    print txt
-    print "Recipient: "
-    to = form.getvalue("recipient")
-    print to
-else:
-    try:
-        f = open(MAIN_FORM, "rb")
-        main_content = f.readlines()
-    except:
-        cgi.sys.exit(1)
+vardict = {'status' : '',
+        'subj' : '',
+        'recp' : '',
+        'text' : '',
+        }
 
-    print "".join(main_content)
+form = cgi.FieldStorage()
+if "mailtext" in form and "recipient" in form and "subject" in form:
+    txt = form.getvalue("mailtext")
+    to = form.getvalue("recipient")
+    subj = form.getvalue("subject")
+
+    vardict['text'] = txt
+    vardict['recp'] = to
+    vardict['subj'] = subj
+    f = tempfile.NamedTemporaryFile()
+    f.write(txt)
+    f.file.flush()
+    inputfile = f.name
+
+    args = ['mixminion', 'send', 
+            '--subject=%s' % subj,
+            '-t', '%s' % to,]
+#            '-i %s' % inputfile]
+#    print " ".join(args)
+    p0 = subprocess.Popen(args, stderr=subprocess.PIPE,
+                        stdout=subprocess.PIPE,
+                        stdin=subprocess.PIPE)
+    out, err = p0.communicate(txt)
+    vardict['status'] = "output: %s stderr: %s" % (out, err)
+    f.close()
+
+try:
+    f = open(MAIN_FORM, "rb")
+    main_content = f.read()
+except:
+    cgi.sys.exit(1)
+
+for k,v in vardict.items():
+    main_content = main_content.replace("{$%s}" % k, v)
+print "".join(main_content)
