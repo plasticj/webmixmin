@@ -28,22 +28,16 @@ if "mailtext" in form and "recipient" in form and "subject" in form:
     vardict['text'] = txt
     vardict['recp'] = to
     vardict['subj'] = subj
-    f = tempfile.NamedTemporaryFile()
-    f.write(txt)
-    f.file.flush()
     inputfile = f.name
 
     args = ['mixminion', 'send', 
             '--subject=%s' % subj,
             '-t', '%s' % to,]
-#            '-i %s' % inputfile]
-#    print " ".join(args)
     p0 = subprocess.Popen(args, stderr=subprocess.PIPE,
                         stdout=subprocess.PIPE,
                         stdin=subprocess.PIPE)
     out, err = p0.communicate(txt)
     vardict['status'] = "output: %s stderr: %s" % (out, err)
-    f.close()
 
 try:
     f = open(MAIN_FORM, "rb")
