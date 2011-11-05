@@ -28,7 +28,6 @@ if "mailtext" in form and "recipient" in form and "subject" in form:
     vardict['text'] = txt
     vardict['recp'] = to
     vardict['subj'] = subj
-    inputfile = f.name
 
     args = ['mixminion', 'send', 
             '--subject=%s' % subj,
