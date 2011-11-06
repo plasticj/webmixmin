@@ -8,7 +8,7 @@ cgitb.enable()
 import subprocess
 import tempfile
 
-MAIN_FORM="mail.html"
+MAIN_FORM="webmixmin.html"
 
 print "Content-Type: text/html"     # HTML is following
 print                               # blank line, end of headers
